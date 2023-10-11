@@ -37,46 +37,10 @@ func (controller *AuthController) Login(ctx *fiber.Ctx) error {
 	return ctx.Status(responseCode).JSON(model.LoginResponse{AccessToken: accessToken, RefreshTokenToken: refreshToken})
 }
 
-// type RefreshTokenRequest struct {
-// 	RefreshToken string `json:"refresh_token"`
-// }
-
 func (controller *AuthController) RefreshToken(ctx *fiber.Ctx) error {
-	// refreshToken := ctx.Cookies("refresh_token")
-	// fmt.Println(refreshToken)
-	// cookie := new(fiber.Cookie)
-	// cookie.Name = "refresh_token"
-	// cookie.Value = "wkwkwkkw"
-	// cookie.HTTPOnly = true
-	// cookie.Expires = time.Now().Add(24 * time.Hour)
-	// ctx.Cookie(cookie)
-	// return ctx.Status(200).JSON("wkwkwkkw")
-	// redis := config.NewRedis()
-	// token, err := redis.Get("refresh_token:c45469ae-dd47-43f2-bf79-cc641323d426")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// return ctx.SendString(string(token))
-
 	tokenString := ctx.Get("Refresh-Token")
 	responseCode, accessToken := controller.AuthService.RefreshToken(tokenString)
-	// byteToken := service.RedisService.Get("refresh_token:"+token)
-	return ctx.Status(responseCode).JSON(accessToken)
-	// token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-	// 	// Don't forget to validate the alg is what you expect:
-	// 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-	// 		return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-	// 	}
-
-	// 	// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-	// 	return []byte("rahasia"), nil
-	// })
-
-	// if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-	// 	fmt.Println(claims)
-	// } else {
-	// 	fmt.Println(err)
-	// }
-
-	return nil
+	response := model.GetResponse(responseCode, model.LoginResponse{AccessToken: *accessToken, RefreshTokenToken: tokenString})
+	return ctx.Status(responseCode).JSON(response)
+	// return ctx.Status(responseCode).JSON(model.GetResponse(model.LoginResponse{AccessToken: *accessToken, RefreshTokenToken: tokenString}))
 }

@@ -75,8 +75,7 @@ func DecodeTokenString(tokenString string) jwt.MapClaims {
 }
 
 // verify jwt token by token string in header or payload
-// return boolean,return true if token is valid
-func VerifyToken(tokenString string) bool {
+func VerifyToken(tokenString string) (*jwt.Token, bool) {
 	token, _ := jwt.Parse("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkaXRAbWFpbC5jb20iLCJleHAiOjE3MjI4NTA4MjcsImtleSI6InJhaGFzaWEifQ.GGgqjc4z_lQUUedAVeYQz4tjh4WrG_QAt5cpRjvB-7s", func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -88,8 +87,8 @@ func VerifyToken(tokenString string) bool {
 	})
 
 	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return true
+		return token, true
 	} else {
-		return false
+		return nil, false
 	}
 }

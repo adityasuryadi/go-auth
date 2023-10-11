@@ -61,12 +61,12 @@ func (service *AuthServiceImpl) RefreshToken(token string) (int, *string) {
 		return 403, nil
 	}
 
-	isValidToken := security.VerifyToken(token)
+	jwtToken, isValidToken := security.VerifyToken(token)
 	if !isValidToken {
 		return 401, nil
 	}
 
-	claims := security.DecodeTokenString(token)
+	claims := security.DecodeToken(jwtToken)
 	if claims == nil {
 		return 403, nil
 	}
