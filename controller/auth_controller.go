@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"auth-service/config"
 	"auth-service/model"
 	"auth-service/service"
 
@@ -33,14 +34,31 @@ func (controller *AuthController) Register(ctx *fiber.Ctx) error {
 func (controller *AuthController) Login(ctx *fiber.Ctx) error {
 	var request model.LoginRequest
 	ctx.BodyParser(&request)
+	valid := config.NewValidation()
+	errValidation := valid.ValidateRequest(request)
+	if errValidation != nil {
+		return ctx.Status(400).JSON(model.GetResponse(400, errValidation, "Validation Error"))
+	}
 	responseCode, accessToken, refreshToken := controller.AuthService.Login(&request)
-	return ctx.Status(responseCode).JSON(model.LoginResponse{AccessToken: accessToken, RefreshTokenToken: refreshToken})
+	if accessToken == "" {
+		return ctx.Status(400).JSON(model.GetResponse(400, "", "Email Or Password Incorect"))
+	}
+	// var data = []interface{}{
+	// 	model.LoginResponse{
+	// 		AccessToken:       accessToken,
+	// 		RefreshTokenToken: refreshToken,
+	// 	},
+	// }
+	response := model.GetResponse(responseCode, model.LoginResponse{
+		AccessToken:       accessToken,
+		RefreshTokenToken: refreshToken,
+	}, "Success")
+	return ctx.Status(responseCode).JSON(response)
 }
 
 func (controller *AuthController) RefreshToken(ctx *fiber.Ctx) error {
 	tokenString := ctx.Get("Refresh-Token")
 	responseCode, accessToken := controller.AuthService.RefreshToken(tokenString)
-	response := model.GetResponse(responseCode, model.LoginResponse{AccessToken: *accessToken, RefreshTokenToken: tokenString})
+	response := model.GetResponse(responseCode, model.LoginResponse{AccessToken: *accessToken, RefreshTokenToken: tokenString}, "success")
 	return ctx.Status(responseCode).JSON(response)
-	// return ctx.Status(responseCode).JSON(model.GetResponse(model.LoginResponse{AccessToken: *accessToken, RefreshTokenToken: tokenString}))
 }
