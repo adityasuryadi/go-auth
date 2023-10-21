@@ -5,12 +5,13 @@ import (
 )
 
 type WebResponse struct {
-	Code   int         `json:"response_code"`
-	Status string      `json:"status"`
-	Data   interface{} `json:"data"`
+	Code    int         `json:"response_code"`
+	Status  string      `json:"status"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
-func GetResponse(responseCode int, data interface{}) WebResponse {
+func GetResponse(responseCode int, data interface{}, message string) WebResponse {
 	var Code int
 	var Status string
 	switch responseCode {
@@ -26,14 +27,18 @@ func GetResponse(responseCode int, data interface{}) WebResponse {
 	case 400:
 		Code = fiber.StatusBadRequest
 		Status = "BAD_REQUEST"
+	case 401:
+		Code = fiber.StatusUnauthorized
+		Status = "UNAUTHORIZED"
 	case 500:
 		Code = fiber.StatusInternalServerError
 		Status = "INTERNAL_SERVER_ERROR"
 	}
 
 	return WebResponse{
-		Code:   Code,
-		Status: Status,
-		Data:   data,
+		Code:    Code,
+		Status:  Status,
+		Message: message,
+		Data:    data,
 	}
 }

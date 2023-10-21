@@ -12,7 +12,7 @@ func ClaimAccessToken(email string) (string, error) {
 	claims := jwt.MapClaims{
 		"key":   "rahasia",
 		"email": email,
-		"exp":   time.Now().Add(time.Second * 30).Unix(),
+		"exp":   time.Now().Add(time.Second * 60).Unix(),
 	}
 
 	// Create token

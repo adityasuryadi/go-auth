@@ -26,6 +26,15 @@ type RedisConfigImpl struct {
 	Redis *redis.Storage
 }
 
+// Delete implements RedisService.
+func (service *RedisConfigImpl) Delete(key string) error {
+	err := service.Redis.Delete(key)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Get implements RedisConfig.
 func (service *RedisConfigImpl) Get(key string) *[]byte {
 	result, err := service.Redis.Get(key)
