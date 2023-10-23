@@ -14,11 +14,13 @@ import (
 
 type AuthController struct {
 	AuthService service.AuthService
+	Validate    config.Validation
 }
 
-func NewAuthController(AuthService service.AuthService) AuthController {
+func NewAuthController(AuthService service.AuthService, validate config.Validation) AuthController {
 	return AuthController{
 		AuthService: AuthService,
+		Validate:    validate,
 	}
 }
 
@@ -34,6 +36,12 @@ func (controller *AuthController) Route(app *fiber.App) {
 func (controller *AuthController) Register(ctx *fiber.Ctx) error {
 	var request model.RegisterRequest
 	ctx.BodyParser(&request)
+	valid := controller.Validate
+	errValidation := valid.ValidateRequest(request)
+	if errValidation != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(model.GetResponse(fiber.StatusBadRequest, errValidation, "Validation Error"))
+	}
+
 	controller.AuthService.Register(request)
 	return ctx.Status(fiber.StatusOK).JSON(nil)
 }
@@ -41,8 +49,7 @@ func (controller *AuthController) Register(ctx *fiber.Ctx) error {
 func (controller *AuthController) Login(ctx *fiber.Ctx) error {
 	var request model.LoginRequest
 	ctx.BodyParser(&request)
-	fmt.Println(&request)
-	valid := config.NewValidation()
+	valid := controller.Validate
 	errValidation := valid.ValidateRequest(request)
 	if errValidation != nil {
 		return ctx.Status(400).JSON(model.GetResponse(400, errValidation, "Validation Error"))

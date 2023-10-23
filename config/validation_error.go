@@ -30,7 +30,7 @@ func GetErrorMsg(fe validator.FieldError) string {
 	case "email":
 		return "format email salah"
 	case "unique":
-		return "data exist"
+		return fe.Field() + " exist"
 	case "min":
 		return "minimal " + fe.Param() + " karakter"
 	case "max":
@@ -39,6 +39,8 @@ func GetErrorMsg(fe validator.FieldError) string {
 		return "Harus Image"
 	case "number":
 		return "harus numeric"
+	case "eqfield":
+		return "field harus sama dengan " + fe.Param()
 	}
 	return "Unknown error"
 }

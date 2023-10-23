@@ -1,11 +1,13 @@
 package config
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
 )
 
 // contract
@@ -13,7 +15,7 @@ type Validation interface {
 	ValidateRequest(request interface{}) interface{}
 }
 
-func NewValidation() Validation {
+func NewValidation(db *gorm.DB) Validation {
 	validate := validator.New()
 
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
@@ -22,6 +24,20 @@ func NewValidation() Validation {
 			return ""
 		}
 		return name
+	})
+
+	validate.RegisterValidation("unique", func(fl validator.FieldLevel) bool {
+		// fmt.Println(fl.StructFieldName())
+		// // get parameter dari tag struct validate
+		table := fl.Param()
+		field := strings.ToLower(fl.StructFieldName())
+		var total int64
+		err := db.Table(table).Where(""+field+" = ?", fl.Field()).Count(&total).Error
+		if err != nil {
+			fmt.Println(err)
+		}
+		// // Return true if the count is zero (i.e., the value is unique)
+		return total == 0
 	})
 
 	// validasi gte than now

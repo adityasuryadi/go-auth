@@ -50,7 +50,8 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	redisService := service.NewRedisConfig(redisConfig, 7200)
 	authService := service.NewAuthService(userRepo, redisService)
-	authController := controller.NewAuthController(authService)
+	validate := config.NewValidation(db)
+	authController := controller.NewAuthController(authService, validate)
 	app.Use(recover.New(recover.ConfigDefault))
 	app.Use(cors.New(cors.Config{
 		AllowHeaders:     "Origin, Content-Type, Accept, Range, Authorization",
